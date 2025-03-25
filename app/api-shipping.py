@@ -12,9 +12,9 @@ def obtener_conexion():
     try:
         return mysql.connector.connect(
             host="localhost", # IP del servidor donde se aloja la BD
-            user="root", # Usuario de la base de datos
-            password="Egonegro2002", # Contraseña del usuario
-            database="paqueteria", # Nombre de la base de datos
+            user="tu_usuario", # Usuario de la base de datos
+            password="tu_constrasena", # Contraseña del usuario
+            database="bd", # Nombre de la base de datos
             auth_plugin="mysql_native_password"  # Especificar el plugin
         )
     except mysql.connector.Error as err:
