@@ -77,7 +77,7 @@ def crear_usuario():
         cursor.close()
         conexion.close()
 
-
+# Función para consultar un usuario a la BD.
 @app.route("/usuario/consultar", methods=["POST"])
 def consultar_usuario():
     datos = request.json  # Obtener el username de los parámetros de la URL
@@ -102,7 +102,7 @@ def consultar_usuario():
         print(e)
         return jsonify({"status": "error", "mensaje": str(e)}), 500
 
-
+# Función para actualizar el usuario a la BD
 @app.route("/api/usuarios/<int:id>", methods=["PUT"])
 def actualizar_usuario(id):
     datos_actualizados = request.json
@@ -124,7 +124,7 @@ def actualizar_usuario(id):
         cursor.close()
         conexion.close()
 
-
+# Función para eliminar un usuario de la BD. En este servicio debe de ser DELETE, no POST.
 @app.route('/eliminarUsers', methods=['POST'])
 def eliminar_usuario():
     conexion = obtener_conexion()
@@ -144,7 +144,7 @@ def eliminar_usuario():
         cursor.close()
         conexion.close()
 
-
+# Función para cotizar con el codigo postal.
 @app.route("/Cotizar/CP", methods=["POST"])
 def Cotizar():
     conexion = obtener_conexion()
@@ -186,7 +186,7 @@ def Cotizar():
         cursor.close()
         conexion.close()
 
-
+# Función para cotizar un paquete
 @app.route("/Cotizar/Paquete", methods=["POST"])
 def CotizarPaquete():
     conexion = obtener_conexion()
@@ -236,7 +236,7 @@ def CotizarPaquete():
         cursor.close()
         conexion.close()
 
-
+# Función para realizar envios.
 @app.route('/Cotizar/Envio', methods=['POST'])
 def Envios():
     datos = request.json
@@ -307,7 +307,7 @@ def Envios():
 
     return jsonify({"status": "success", "mensaje": "Datos procesados correctamente", "Rastreo_Code": rastreo_code}), 200
 
-
+# Función para rastrear un envio con el código de rastreo
 @app.route("/rastrear/rastreo", methods=["POST"])
 def rastrear_envio():
     conexion = obtener_conexion()
