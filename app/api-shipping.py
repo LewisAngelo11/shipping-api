@@ -64,7 +64,7 @@ def login():
         return jsonify({"status": "error", "mensaje": "Credenciales incorrectas"}), 401
 
 
-# IMPORTANTE EN ESTA FUNCIÓN: Lo mismo con el método de Login, se debe encriptar las contraseñas, hay que agregar un método de encriptación
+# IMPORTANTE EN ESTA FUNCIÓN: Lo mismo con el método de Login, se debe encriptar las contraseñas, agregar un método de encriptación
 # Funcion para crear un usuario a la base de datos
 @app.route("/api/usuario", methods=["POST"])
 def crear_usuario():
@@ -329,7 +329,7 @@ def Envios():
 
     return jsonify({"status": "success", "mensaje": "Datos procesados correctamente", "Rastreo_Code": rastreo_code}), 200
 
-# CORRECIONES: En este función probar con el método "GET" en vez de "POST"
+# CORRECIONES: En esta función probar con el método "GET" en vez de "POST"
 # Función para rastrear un envio con el código de rastreo
 @app.route("/rastrear/rastreo", methods=["POST"])
 def rastrear_envio():
