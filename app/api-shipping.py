@@ -1,3 +1,20 @@
+# NOTA:
+# 1. **Commits**:
+#    - Al realizar un commit, asegúrate de que el mensaje sea lo más específico posible.
+#    - El mensaje de commit debe describir claramente qué cambios se realizaron en el código, por ejemplo:
+#      "Añadir endpoint para consulta de usuario" o "Corregir error en la validación de contraseñas".
+#      Evita mensajes vagos como "Arreglos generales" o "Cambio de código".
+#    - Si el commit está relacionado con un bug, agrega el número del ticket o descripción del problema en el mensaje.
+# 2. **Pull Requests**:
+#    - Después de hacer tus cambios, realiza un *pull request* al repositorio principal (original).
+#    - El pull request debe ser validado por un miembro del equipo antes de que se pueda fusionar.
+#    - Asegúrate de que el pull request esté bien descrito, explicando qué cambios se realizaron y cualquier otra información relevante.
+# 3. **Comentarios en el Código**:
+#    - Es muy importante agregar comentarios explicativos en el código.
+#    - Los comentarios deben ser claros y explicar la **lógica de negocio** o el **porqué** de ciertos bloques de código, no solo el **qué**.
+#    - Ejemplo de buen comentario: "# Validamos que la contraseña tenga al menos 8 caracteres, una mayúscula y un número".
+#    - Evitar comentarios innecesarios como "# Sumar dos números", si el código es obvio.
+
 import mysql.connector
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -21,6 +38,7 @@ def obtener_conexion():
         print(f"Error al conectar a la base de datos: {err}")
         return None
 
+# IMPORTANTE EN ESTA FUNCION: se debe encriptar las contraseñas para evitar vulnerabilidades en los datos sensibles
 # Funcion para validar el acceso a un usuario a la pagina
 @app.route("/login", methods=["POST"])
 def login():
@@ -46,6 +64,7 @@ def login():
         return jsonify({"status": "error", "mensaje": "Credenciales incorrectas"}), 401
 
 
+# IMPORTANTE EN ESTA FUNCIÓN: Lo mismo con el método de Login, se debe encriptar las contraseñas, hay que agregar un método de encriptación
 # Funcion para crear un usuario a la base de datos
 @app.route("/api/usuario", methods=["POST"])
 def crear_usuario():
@@ -77,6 +96,7 @@ def crear_usuario():
         cursor.close()
         conexion.close()
 
+# CORRECIONES: el método http de esta función debe ser "GET" y no "POST".
 # Función para consultar un usuario a la BD.
 @app.route("/usuario/consultar", methods=["POST"])
 def consultar_usuario():
@@ -124,7 +144,8 @@ def actualizar_usuario(id):
         cursor.close()
         conexion.close()
 
-# Función para eliminar un usuario de la BD. En este servicio debe de ser DELETE, no POST.
+# CORRECIONES: El método http de esta función debe ser "DELETE" y no "POST"
+# Función para eliminar un usuario de la BD.
 @app.route('/eliminarUsers', methods=['POST'])
 def eliminar_usuario():
     conexion = obtener_conexion()
@@ -144,7 +165,8 @@ def eliminar_usuario():
         cursor.close()
         conexion.close()
 
-# Función para cotizar con el codigo postal.
+# RECOMENDACIONES: Cambiar el nombre de la función ya que es ambiguo el actual y puede generar confusiones.
+# Función para retornar los valores de Municipio y Estado con el codigo postal.
 @app.route("/Cotizar/CP", methods=["POST"])
 def Cotizar():
     conexion = obtener_conexion()
@@ -307,6 +329,7 @@ def Envios():
 
     return jsonify({"status": "success", "mensaje": "Datos procesados correctamente", "Rastreo_Code": rastreo_code}), 200
 
+# CORRECIONES: En este función probar con el método "GET" en vez de "POST"
 # Función para rastrear un envio con el código de rastreo
 @app.route("/rastrear/rastreo", methods=["POST"])
 def rastrear_envio():
@@ -357,6 +380,6 @@ def rastrear_envio():
         }), 200
     return jsonify({"status": "error", "mensaje": "Numero de rastreo no encontrado"}), 404
 
-
+# Iniciar la API, Cambiar el puerto o el host si es necesario.
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
