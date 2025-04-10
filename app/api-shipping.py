@@ -20,6 +20,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from geopy.distance import geodesic   #libreria para posteriormente obtener distancias entre destino y origen de un paquete
 import random
+import bcrypt # Libreria para encriptar contraseñas, asegurarse de instalar bcrypt con el comando 'pip install bcrypt'
 
 app = Flask(__name__)
 CORS(app)  # Habilita CORS para todos los endpoints
@@ -38,7 +39,7 @@ def obtener_conexion():
         print(f"Error al conectar a la base de datos: {err}")
         return None
 
-# IMPORTANTE EN ESTA FUNCION: se debe encriptar las contraseñas para evitar vulnerabilidades en los datos sensibles
+# ¡¡ENCRIPTACION AGREGADA!!
 # Funcion para validar el acceso a un usuario a la pagina
 @app.route("/login", methods=["POST"])
 def login():
@@ -53,18 +54,21 @@ def login():
 
     cursor = conexion.cursor(dictionary=True)
     # Consulta para validar el usuario en la BD
-    cursor.execute("SELECT * FROM usuario WHERE Usuario = %s AND Contrasena = %s", (usuario, contrasena))
+    cursor.execute("SELECT * FROM usuario WHERE Usuario = %s", (usuario,))
     resultado = cursor.fetchone()
     cursor.close()
     conexion.close()
 
     if resultado:
-        return jsonify({"status": "success", "rol": resultado.get("Rol", "Usuario")}), 200
+        contrasena_guardada = resultado["Contrasena"] # Esta contraseña será hasheada y comparada con la que esta en la BD que igualmente esta hasheada
+        # Verificar la contraseña usando bcrypt
+        if bcrypt.checkpw(contrasena.encode('utf-8'), contrasena_guardada.encode('utf-8')):
+            return jsonify({"status": "success", "rol": resultado.get("Rol", "Usuario")}), 200
     else:
-        return jsonify({"status": "error", "mensaje": "Credenciales incorrectas"}), 401
+        return jsonify({"status": "error", "mensaje": "Las credenciales son incorrectas"}), 401
 
 
-# IMPORTANTE EN ESTA FUNCIÓN: Lo mismo con el método de Login, se debe encriptar las contraseñas, agregar un método de encriptación
+# ¡¡ENCRIPTACION AGREGADA!!
 # Funcion para crear un usuario a la base de datos
 @app.route("/api/usuario", methods=["POST"])
 def crear_usuario():
@@ -82,11 +86,14 @@ def crear_usuario():
     Usuario = usuario.get('Usuario')
     Password = usuario.get('Contrasena')
 
+    # Hashear la contraseña antes de guardarla a la BD
+    Password_hash = bcrypt.hashpw(Password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
     cursor = conexion.cursor()
     try:
         cursor.execute(
             "INSERT INTO usuario (Nombre, Apellido1, Apellido2, Fecha_Nacimiento, Email, Usuario, Contrasena) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-            (Name, Apellido1, Apellido2, Fecha_Nac, Email, Usuario, Password)
+            (Name, Apellido1, Apellido2, Fecha_Nac, Email, Usuario, Password_hash)
         )
         conexion.commit()
         return jsonify({"status": "success", "mensaje": "Usuario creado"}), 201
@@ -96,7 +103,7 @@ def crear_usuario():
         cursor.close()
         conexion.close()
 
-# CORRECIONES: el método http de esta función debe ser "GET" y no "POST".
+# CORRECIONES: el metodo http de esta función debe ser "GET" y no "POST".
 # Función para consultar un usuario a la BD.
 @app.route("/usuario/consultar", methods=["POST"])
 def consultar_usuario():
@@ -144,7 +151,7 @@ def actualizar_usuario(id):
         cursor.close()
         conexion.close()
 
-# CORRECIONES: El método http de esta función debe ser "DELETE" y no "POST"
+# CORRECIONES: El metodo http de esta función debe ser "DELETE" y no "POST"
 # Función para eliminar un usuario de la BD.
 @app.route('/eliminarUsers', methods=['POST'])
 def eliminar_usuario():
@@ -329,7 +336,7 @@ def Envios():
 
     return jsonify({"status": "success", "mensaje": "Datos procesados correctamente", "Rastreo_Code": rastreo_code}), 200
 
-# CORRECIONES: En esta función probar con el método "GET" en vez de "POST"
+# CORRECIONES: En esta función probar con el metodo "GET" en vez de "POST"
 # Función para rastrear un envio con el código de rastreo
 @app.route("/rastrear/rastreo", methods=["POST"])
 def rastrear_envio():
