@@ -3,8 +3,13 @@
 from flask import Blueprint, request, jsonify
 from Database.conexion import obtener_conexion
 from utils.password_utils import verificar_password, hash_password
+import jwt
+import datetime
+from config import JWT_SECRET
 
 auth_bp = Blueprint("auth", __name__)
+
+JWT_EXP_DELTA_SECONDS = 3600  # El token expirará en 1 hora
 
 # ¡¡ENCRIPTACION AGREGADA!!
 # Funcion para validar el acceso a un usuario a la pagina
@@ -30,7 +35,21 @@ def login():
         contrasena_guardada = resultado["Contrasena"] # Esta contraseña será encriptada y comparada con la que esta en la BD que igualmente esta encriptada
         # Verificar la contraseña usando bcrypt
         if verificar_password(contrasena, contrasena_guardada): # Usar la funcion para encriptar la contraseña
-            return jsonify({"status": "success", "rol": resultado.get("Rol", "Usuario")}), 200
+            # Si la contraseña es correcta, generar el token JWT
+            payload = {
+                "usuario": usuario,
+                "rol": resultado.get("Rol", "Usuario"),
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(seconds=JWT_EXP_DELTA_SECONDS)
+            }
+            # Generar el token JWT
+            token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
+
+            # Devolver el token en la respuesta
+            return jsonify({
+                "status": "success",
+                "rol": resultado.get("Rol", "Usuario"),
+                "token": token  # El token JWT se envía al cliente
+            }), 200
     else:
         return jsonify({"status": "error", "mensaje": "Las credenciales son incorrectas"}), 401
 
