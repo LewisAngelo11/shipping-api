@@ -1,0 +1,25 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables / Secrets
+.env
+*.env
+
+# Virtual environment
+venv/
+.env/
+
+# VSCode settings (si usas VSCode)
+.vscode/
+
+# MacOS / Linux / Windows basura
+.DS_Store
+Thumbs.db
+
+# Archivos de log
+*.log
+
+# SQLite DB (si tienes alguna local)
+*.sqlite3
