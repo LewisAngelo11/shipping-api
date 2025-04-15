@@ -1,32 +1,43 @@
 # Endpoints de los metodos para los usuarios como consultar, actualizar y eliminar usuario
-
+import jwt
 from flask import Blueprint, request, jsonify
 from Database.conexion import obtener_conexion
+from config import JWT_SECRET  # la clave secreta del token
 
 user_bp = Blueprint("users", __name__)
 
-# CORRECIONES: el metodo http de esta función debe ser "GET" y no "POST".
+# CORREGIDO
 # Función para consultar un usuario a la BD.
-@user_bp.route("/usuario/consultar", methods=["POST"])
+@user_bp.route("/usuario/consultar", methods=["GET"])
 def consultar_usuario():
-    datos = request.json  # Obtener el username de los parámetros de la URL
-    conexion = obtener_conexion()
-    print(datos)
-    if not conexion:
-        return jsonify({"status": "error", "mensaje": "Error de conexión con la base de datos"}), 500
+    token = request.headers.get("Authorization")  # Obtener el username de los parámetros de la URL
+    if not token:
+        return jsonify({"error": "Token no proporcionado"}), 401
 
     try:
+        # Eliminar "Bearer " si está presente
+        token = token.replace("Bearer ", "")
+        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+
+        # Extraer datos del payload
+        usuario = payload.get("usuario")
+
+        conexion = obtener_conexion()
         # Realizamos la consulta para obtener la información del usuario
         cursor = conexion.cursor(buffered=True)
-        cursor.execute("SELECT * FROM usuario WHERE Usuario = %s", (datos['username'],))
-        usuario = cursor.fetchone()
+        cursor.execute("SELECT * FROM usuario WHERE Usuario = %s", (usuario,))
+        datos_usuario = cursor.fetchone()
         cursor.close()
         conexion.close()
 
-        if usuario:
-            return jsonify({"status": "success", "username": usuario[1],"Apellido1": usuario[2],"Apellido2":usuario[3],"Fecha_Nacimiento":usuario[4],"Edad": usuario[5],"Email": usuario[6],"User": usuario[7],"Contraseña": usuario[8]}), 200
+        if datos_usuario:
+            return jsonify({"status": "success", "Nombre": datos_usuario[1],"Apellido1": datos_usuario[2],"Apellido2": datos_usuario[3],"Fecha_Nacimiento": datos_usuario[4],"Edad": datos_usuario[5],"Email": datos_usuario[6],"User": datos_usuario[7]}), 200
         else:
             return jsonify({"status": "error", "mensaje": "Usuario no encontrado"}), 404
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token expirado"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "Token inválido"}), 401
     except Exception as err:
         print(err)
         return jsonify({"status": "error", "mensaje": str(err)}), 500

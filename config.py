@@ -3,9 +3,9 @@ import os
 # Configuración para MySQL
 DB_CONFIG = {
     'host': 'localhost',
-    'user': 'root',
-    'password': 'Egonegro2002',
-    'database': 'paqueteria'
+    'user': 'tu_usuario',
+    'password': 'tu_contraseña',
+    'database': 'tu_base_datos'
 }
 
 # Clave secreta para JWT (Aún no integrado el token)
