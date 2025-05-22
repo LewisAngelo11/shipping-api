@@ -13,7 +13,10 @@ class Paquete(Base):
     Largo = Column(DECIMAL(16, 2), nullable=True)
     Alto = Column(DECIMAL(16, 2), nullable=True)
     Ancho = Column(DECIMAL(16, 2), nullable=True)
+    id_Envio = Column(Integer, ForeignKey('envio.id_Envio'), nullable=True)
 
+    # Relación con Paquete (un rastreo está asociado a un paquete)
+    envio = relationship('Envio', primaryjoin="Paquete.id_Envio == Envio.id_Envio")
 
     def __repr__(self):
         return f"<Paquete(id_Paquete={self.id_Paquete}, Guia={self.Guia})>"

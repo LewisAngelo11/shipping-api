@@ -19,7 +19,6 @@ class Envio(Base):
     Costo = Column(Integer, nullable=True)
     Origen = Column(String(70), nullable=True)
     Destino = Column(String(70), nullable=True)
-    id_Paquete = Column(Integer, ForeignKey('paquete.id_Paquete'), nullable=True)
     id_Remitente = Column(Integer, ForeignKey('usuario.id_Usuario'), nullable=True)
     id_Destinatario = Column(Integer, ForeignKey('usuario.id_Usuario'), nullable=True)
     Estatus = Column(
@@ -32,8 +31,6 @@ class Envio(Base):
     # Relación con Usuario como destinatario
     destinatario = relationship('Usuario', foreign_keys=[id_Destinatario])
 
-    # Relación con paquete
-    numero_paquete = relationship('Paquete', foreign_keys=[id_Paquete])
 
     def __repr__(self):
         return f"<Envio(id_Envio={self.id_Envio}, Estatus={self.Estatus})>"
