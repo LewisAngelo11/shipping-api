@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `paqueteria` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `paqueteria`;
 -- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
 --
 -- Host: localhost    Database: paqueteria
@@ -94,18 +92,15 @@ CREATE TABLE `envio` (
   `Costo` double DEFAULT NULL,
   `Origen` varchar(70) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `Destino` varchar(70) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `id_Paquete` int DEFAULT NULL,
   `id_Remitente` int DEFAULT NULL,
   `id_Destinatario` int DEFAULT NULL,
   `Estatus` enum('EN PROCESO','ENVIADO','EN ENTREGA A DOMICILIO','ENTREGADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id_Envio`),
-  KEY `id_Paquete` (`id_Paquete`),
   KEY `id_Remitente` (`id_Remitente`),
   KEY `id_Destinatario` (`id_Destinatario`),
-  CONSTRAINT `envio_ibfk_1` FOREIGN KEY (`id_Paquete`) REFERENCES `paquete` (`id_Paquete`),
   CONSTRAINT `envio_ibfk_2` FOREIGN KEY (`id_Remitente`) REFERENCES `usuario` (`id_Usuario`),
   CONSTRAINT `envio_ibfk_3` FOREIGN KEY (`id_Destinatario`) REFERENCES `usuario` (`id_Usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -202,13 +197,16 @@ DROP TABLE IF EXISTS `paquete`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `paquete` (
   `id_Paquete` int NOT NULL AUTO_INCREMENT,
+  `Guia` varchar(18) COLLATE utf8mb4_unicode_ci NOT NULL,
   `Peso` decimal(16,2) DEFAULT NULL,
-  `Estatus` enum('EN PROCESO','ENVIADO','EN ENTREGA A DOMICILIO','ENTREGADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `Largo` decimal(16,2) DEFAULT NULL,
   `Alto` decimal(16,2) DEFAULT NULL,
   `Ancho` decimal(16,2) DEFAULT NULL,
-  PRIMARY KEY (`id_Paquete`)
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id_Envio` int DEFAULT NULL,
+  PRIMARY KEY (`id_Paquete`),
+  KEY `fk_paquete_envio_idx` (`id_Envio`),
+  CONSTRAINT `fk_paquete_envio` FOREIGN KEY (`id_Envio`) REFERENCES `envio` (`id_Envio`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -219,12 +217,11 @@ DROP TABLE IF EXISTS `rastreo`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `rastreo` (
-  `Codigo_Rastreo` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `id_Paquete` int DEFAULT NULL,
+  `Codigo_Rastreo` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Num_Paquetes` int DEFAULT NULL,
   `id_Envio` int DEFAULT NULL,
-  KEY `id_Paquete` (`id_Paquete`),
+  PRIMARY KEY (`Codigo_Rastreo`),
   KEY `id_Envio` (`id_Envio`),
-  CONSTRAINT `rastreo_ibfk_1` FOREIGN KEY (`id_Paquete`) REFERENCES `paquete` (`id_Paquete`),
   CONSTRAINT `rastreo_ibfk_2` FOREIGN KEY (`id_Envio`) REFERENCES `envio` (`id_Envio`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -261,7 +258,7 @@ CREATE TABLE `usuario` (
   `Usuario` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `Contrasena` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id_Usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -303,4 +300,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-18  0:35:45
+-- Dump completed on 2025-05-21 22:15:20
