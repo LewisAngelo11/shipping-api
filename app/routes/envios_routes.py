@@ -27,62 +27,60 @@ def obtener_id_usuario(email_usuario, session):
 @envios_bp.route('/Cotizar/Envio', methods=['POST'])
 def Envios():
     datos = request.json
-    required_keys = ['Origen', 'Destino', 'Peso', 'Largo', 'Alto', 'Ancho', 'EmailR', 'EmailD']
-
-    guia_code = ''.join([str(random.randint(0, 9)) for _ in range(18)])
-
-    nuevo_paquete = Paquete(
-        Peso=datos.get('Peso'),
-        Largo=datos.get('Largo'),
-        Alto=datos.get('Alto'),
-        Ancho=datos.get('Ancho'),
-        Guia=guia_code
-    )
-
-    # Verificar si los atributos existen en los datos
-    if not all(key in datos for key in required_keys):
-        return jsonify({"status": "error", "mensaje": "Datos incompletos"}), 400
+    paquetes_data = datos.get('paquetes', [])
+    paquetes_creados = []
 
     db = get_session()
 
+    # Obtener Id del remitente
+    email_remitente = datos.get('EmailR')
+    Id_Remitente = obtener_id_usuario(email_remitente, db)
+
+    # Obtener Id del destinatario
+    email_destinatario = datos.get('EmailD')
+    Id_Destinatario = obtener_id_usuario(email_destinatario, db)
+
+    costo = float(datos['tarifa'].replace('$', ''))
+    nuevo_envio = Envio(
+        Fecha_Entrega=datos.get('FechaR'),
+        Costo=costo,
+        Origen=datos.get('Origen'),
+        Destino=datos.get('Destino'),
+        id_Remitente=Id_Remitente,
+        id_Destinatario=Id_Destinatario,
+        Estatus=EstatusEnvio.EN_PROCESO
+    )
+
+    # Insertar en Envio
+    db.add(nuevo_envio)
+    db.flush()  # Asigna ID sin hacer commit total
+
     try:
-        # Insertar en Paquete
-        db.add(nuevo_paquete)
-        db.flush()  # Asigna ID sin hacer commit total
-        Id_Paquete = nuevo_paquete.id_Paquete # Obtener Id del paquete actual
+        for paquete_json in paquetes_data:
+            guia_code = ''.join([str(random.randint(0, 9)) for _ in range(18)])
+            nuevo_paquete = Paquete(
+                Peso=paquete_json.get('peso'),
+                Largo=paquete_json.get('largo'),
+                Alto=paquete_json.get('alto'),
+                Ancho=paquete_json.get('ancho'),
+                Guia=guia_code,
+                id_Envio=nuevo_envio.id_Envio
+            )
 
-        # Obtener Id del remitente
-        email_remitente = datos.get('EmailR')
-        Id_Remitente = obtener_id_usuario(email_remitente, db)
-
-        # Obtener Id del destinatario
-        email_destinatario = datos.get('EmailD')
-        Id_Destinatario = obtener_id_usuario(email_destinatario, db)
-
-        costo = float(datos['tarifa'].replace('$', ''))
-        nuevo_envio = Envio(
-            Fecha_Entrega=datos.get('FechaR'),
-            Costo=costo,
-            Origen=datos.get('Origen'),
-            Destino=datos.get('Destino'),
-            id_Paquete=Id_Paquete,
-            id_Remitente=Id_Remitente,
-            id_Destinatario=Id_Destinatario,
-            Estatus=EstatusEnvio.EN_PROCESO
-        )
-
-        # Insertar en Envio
-        db.add(nuevo_envio)
-        db.flush() # Asigna ID sin hacer commit total
-        Id_Envio = nuevo_envio.id_Envio # Obtener Id del envio actual
+            # Insertar en Paquete
+            db.add(nuevo_paquete)
+            paquetes_creados.append({
+                "id_Paquete": nuevo_paquete.id_Paquete,
+                "Guia": nuevo_paquete.Guia
+            })
 
         # Crear código de rastreo
         rastreo_code = ''.join([str(random.randint(0, 9)) for _ in range(20)])
 
         nuevo_rastreo = Rastreo(
             Codigo_Rastreo=rastreo_code,
-            id_Paquete=Id_Paquete,
-            id_Envio=Id_Envio
+            Num_Paquetes=len(paquetes_creados),
+            id_Envio=nuevo_envio.id_Envio
         )
 
         # Insertar rastreo
@@ -116,7 +114,7 @@ def rastrear_envio():
     resultado = (
         db.query(
             Envio.id_Envio,
-            Rastreo.id_Paquete,
+            Rastreo.Num_Paquetes,
             Envio.Estatus,
             func.concat(UsuarioRemitente.Nombre, ' ', UsuarioRemitente.Apellido1, ' ',
                         UsuarioRemitente.Apellido2).label('Remitente'),
@@ -138,7 +136,7 @@ def rastrear_envio():
         return jsonify({
             "status": "success",
             "id_Envio": fila.id_Envio,
-            "id_Paquete": fila.id_Paquete,
+            "id_Paquete": fila.Num_Paquetes,
             "Estatus": fila.Estatus.value if hasattr(fila.Estatus, "value") else fila.Estatus,
             "Remitente": fila.Remitente,
             "Destinatario": fila.Destinatario,

@@ -18,11 +18,11 @@ cotizar_bp = Blueprint('cotizar', __name__)
 # Función para calcular la distancia y convertirla a la tarifa de envio
 def calcularDistancia(distancia):
     if (distancia) >= 0 and distancia <= 199:
-        return 100
+        return 50
     elif (distancia) >= 200 and distancia <= 499:
-        return 150
+        return 100
     elif distancia >= 500 and distancia <= 799:
-        return 220
+        return 150
 
 
 # Función para la estructura de la query de cotizar un envio (Como se utilizará dos veces, se hizo funcion para no tener codigo repetido)
@@ -120,14 +120,13 @@ def CotizarPaquete():
     municipio_destino = datos.get('MunicipioD')
     entidad_destino = datos.get('EntidadD')
 
+    paquetes = datos.get('paquetes', []) # Lista de paquetes
     print("Datos recibidos en Flask:", datos)
-    PesoVM = (int(datos['Largo']) * int(datos['Ancho']) * int(datos['Alto']))/6000
-    print(str(PesoVM))
+
     db = get_session()
     try:
         # Llama a la función para ejecutar la query
         stmt_origen = execute_query(localidad_origen, municipio_origen, entidad_origen)
-
         result_origen = db.execute(stmt_origen).first()  # Ejecuta la query
         if result_origen:
             latitud_origen = result_origen[4]
@@ -137,25 +136,42 @@ def CotizarPaquete():
             try:
                 # Llama a la función para ejecutar la query
                 stmt_destino = execute_query(localidad_destino, municipio_destino, entidad_destino)
-
                 result_destino = db.execute(stmt_destino).first()  # Ejecuta la query nuevamente
-                tarifa = 0
+
                 if result_destino:
                     latitud_destino = result_destino[4]
                     longitud_destino = result_destino[5]
                     coords_1 = (float(latitud_origen), float(longitud_origen))
                     coords_2 = (float(latitud_destino),float(longitud_destino))
                     distancia = round(geodesic(coords_1, coords_2).kilometers, 2) # Devolver la distancia en kilometros
-                    print(distancia)
-                    tarifa = calcularDistancia(distancia) # Llama a la función para calcular la distancia y la convierte en la tarifa del envio
-                    print(tarifa)
-                    pesomax = max(PesoVM,int(datos['Peso']))
+
+                    tarifa_distancia = calcularDistancia(distancia) # Llama a la función para calcular la distancia y la convierte en la tarifa del envio
                     tarifa_base = 10
-                    tarifa = tarifa + (tarifa_base * int(pesomax))
-                    print(tarifa)
+                    tarifa_total = 0
+                    pesos_vm = []
+                    for paquete in paquetes:
+                        largo = int(paquete['largo'])
+                        ancho = int(paquete['ancho'])
+                        alto = int(paquete['alto'])
+                        peso_fisico = int(paquete['peso'])
+
+                        peso_vm = (largo * ancho * alto) / 6000
+                        pesos_vm.append(round(peso_vm, 2))
+
+                        peso_max = max(peso_vm, peso_fisico)
+                        tarifa_total += tarifa_base * peso_max
+
+                    tarifa_total += tarifa_distancia
+                    print(tarifa_total)
             except Exception as err:
                 return jsonify({"status": "error", "mensaje": str(err)}), 400
-            return jsonify({"status": "success","tarifa": str(tarifa), "pesovm": str(PesoVM), "distancia": str(distancia)}), 200
+            return jsonify({
+                "status": "success",
+                "tarifa": round(tarifa_total, 2),
+                "pesovm": pesos_vm,
+                "distancia": distancia,
+                "num_paquetes": len(paquetes)
+            }), 200
     except Exception as err:
         return jsonify({"status": "error", "mensaje": str(err)}), 400
     finally:
