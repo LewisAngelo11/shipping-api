@@ -1,9 +1,13 @@
 # Endpoints de los metodos para los usuarios como consultar, actualizar y eliminar usuario
 import jwt
+from datetime import date, datetime
 from flask import Blueprint, request, jsonify
+from sqlalchemy import select, cast, String
 from app.config.config import JWT_SECRET  # la clave secreta del token
 from app.config.config_sqlalchemy import get_session
 from app.models.usuario import Usuario
+from app.models.envio import Envio
+from app.models.rastreo import Rastreo
 
 user_bp = Blueprint("users", __name__)
 
@@ -115,3 +119,58 @@ def eliminar_usuario():
     finally:
         cursor.close()
         conexion.close()
+
+
+# Función para consultar el historial de envios hechos por el usuario
+@user_bp.route("/usuario/historial", methods=["GET"])
+def consultar_historial_envios():
+    token = request.headers.get("Authorization")  # Obtener el username de los parámetros de la URL
+    if not token:
+        return jsonify({"error": "Token no proporcionado"}), 401
+
+    db = get_session()  # Obtener sesión SQLAlchemy
+    try:
+        # Eliminar "Bearer " si está presente
+        token = token.replace("Bearer ", "")
+        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+
+        # Extraer datos del payload
+        id_usuario = payload.get("id")
+        print(id_usuario)
+
+        stmt = (
+            select(
+                Envio.Fecha_Envio,
+                Rastreo.Codigo_Rastreo,
+                Envio.Origen,
+                Envio.Destino,
+                cast(Envio.Estatus, String).label("Estatus")
+            )
+            .join(
+                Rastreo,
+                Envio.id_Envio == Rastreo.id_Envio
+            )
+            .filter(
+                Envio.id_Remitente == id_usuario
+            )
+        )
+
+        result = db.execute(stmt).mappings().all()  # Ejecuta la query
+        envios = []
+        for row in result:
+            row_dict = dict(row)
+
+            # Convertir fechas a string YYYY-MM-DD
+            for key in row_dict:
+                if isinstance(row_dict[key], (date, datetime)):
+                    row_dict[key] = row_dict[key].strftime("%Y-%m-%d")
+
+            envios.append(row_dict)
+
+        return jsonify(envios), 200
+
+    except Exception as err:
+        print(err)
+        return jsonify({"status": "error", "mensaje": str(err)}), 500
+    finally:
+        db.close()
