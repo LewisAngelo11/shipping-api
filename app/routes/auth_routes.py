@@ -83,3 +83,99 @@ def crear_usuario():
         return jsonify({"status": "error", "mensaje": str(e)}), 400
     finally:
         session.close() # Cierra la sesión SQLAlchemy para liberar los recursos
+
+# Endpoint para verificar si un email existe en la BD
+@auth_bp.route("/usuario/verificar-email", methods=["POST"])
+def verificar_email():
+    datos = request.json
+    email = datos.get("Email")
+
+    if not email:
+        return jsonify({
+            "status": "error",
+            "existe": False,
+            "mensaje": "Email es requerido"
+        }), 400
+
+    db = get_session()
+    try:
+        # Buscar usuario por email
+        usuario_encontrado = db.query(Usuario).filter(Usuario.Email == email).first()
+
+        if usuario_encontrado:
+            return jsonify({
+                "status": "success",
+                "existe": True,
+                "mensaje": "Email encontrado"
+            }), 200
+        else:
+            return jsonify({
+                "status": "success",
+                "existe": False,
+                "mensaje": "Email no encontrado"
+            }), 200
+
+    except Exception as e:
+        print(f"Error al verificar email: {e}")
+        return jsonify({
+            "status": "error",
+            "existe": False,
+            "mensaje": "Error interno del servidor"
+        }), 500
+    finally:
+        db.close()
+
+
+# ¡¡ENCRIPTACION AGREGADA!!
+# Endpoint para cambiar contraseña
+@auth_bp.route("/usuario/cambiar", methods=["PUT"])
+def cambiar_contrasena():
+    datos = request.json
+    email = datos.get("Email")
+    nueva_contrasena = datos.get("NuevaContrasena")
+
+    print(f"Solicitud de cambio de contraseña para: {email}")
+
+    # Validar que se enviaron los datos necesarios
+    if not email or not nueva_contrasena:
+        return jsonify({
+            "status": "error",
+            "mensaje": "Email y nueva contraseña son requeridos"
+        }), 400
+
+    db = get_session()
+    try:
+        # Buscar el usuario por email
+        usuario_encontrado = db.query(Usuario).filter(Usuario.Email == email).first()
+
+        if not usuario_encontrado:
+            return jsonify({
+                "status": "error",
+                "mensaje": "No se encontró ningún usuario con ese correo electrónico"
+            }), 404
+
+        # Hash de la nueva contraseña usando bcrypt
+        nueva_contrasena_hash = hash_password(nueva_contrasena)
+
+        # Actualizar la contraseña del usuario
+        usuario_encontrado.Contrasena = nueva_contrasena_hash
+
+        # Guardar cambios en la base de datos
+        db.commit()
+
+        print(f"Contraseña actualizada exitosamente para: {email}")
+
+        return jsonify({
+            "status": "success",
+            "mensaje": "Contraseña actualizada correctamente"
+        }), 200
+
+    except Exception as e:
+        db.rollback()
+        print(f"Error al cambiar contraseña: {e}")
+        return jsonify({
+            "status": "error",
+            "mensaje": "Error interno del servidor"
+        }), 500
+    finally:
+        db.close()

@@ -44,5 +44,5 @@ app.register_blueprint(envios_bp)     # /envios, etc.
 if __name__ == "__main__":
     # Ejecutamos la app en el host 0.0.0.0 (accesible desde cualquier IP) y puerto 5000
     # El modo debug=True ayuda a ver errores y reinicia el servidor automáticamente al cambiar el código
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5001, debug=True)
 

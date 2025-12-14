@@ -23,6 +23,8 @@ def calcularDistancia(distancia):
         return 100
     elif distancia >= 500 and distancia <= 799:
         return 150
+    else:
+        return 200
 
 
 # Función para la estructura de la query de cotizar un envio (Como se utilizará dos veces, se hizo funcion para no tener codigo repetido)

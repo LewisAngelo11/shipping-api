@@ -1,10 +1,10 @@
 import os
 
 # Datos de conexión a MySQL
-DB_USER = "your_user"
+DB_USER = "your_username"
 DB_PASSWORD = "your_password"
-DB_HOST = "localhost"
-DB_NAME = "your_data_base"
+DB_HOST = "your_host"
+DB_NAME = "paqueteria"
 
 # URI para SQLAlchemy
 SQLALCHEMY_DATABASE_URI = f"mysql+mysqlconnector://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
