@@ -12,6 +12,7 @@ class Usuario(Base):
     Fecha_Nacimiento = Column(Date)
     Edad = Column(Integer)
     Email = Column(String(50))
+    Telefono = Column(String(15))
     Usuario = Column(String(30))
     Contrasena = Column(String(100))
 

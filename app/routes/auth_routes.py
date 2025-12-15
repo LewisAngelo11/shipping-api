@@ -19,7 +19,6 @@ def login():
     datos = request.json # Obtiene los datos del archivo json de la pagina web
     usuario = datos.get("Usuario") # Obtiene especificamente el Usuario
     contrasena = datos.get("Contrasena") # Obtiene especificamente la Contraseña
-    print(f"Datos recibidos: Usuario= {usuario}, Contrasena= {contrasena}")
 
     db = get_session()  # Obtener sesión SQLAlchemy
     try:
@@ -61,12 +60,14 @@ def crear_usuario():
     datos = request.json
 
     print("Datos recibidos en Flask:", datos)
+
     # Crea el objeto Usuario para guardarlo a la BD
     nuevo_usuario = Usuario(
         Nombre=datos.get('Nombre'),
         Apellido1=datos.get('Apellido1'),
         Apellido2=datos.get('Apellido2'),
         Fecha_Nacimiento=datos.get('Fecha_Nacimiento'),
+        Telefono=datos.get('Telefono'),
         Email=datos.get('Email'),
         Usuario=datos.get('Usuario'),
         Contrasena=hash_password(datos.get('Contrasena'))

@@ -39,6 +39,7 @@ def consultar_usuario():
                 "Apellido1": datos_usuario.Apellido1,
                 "Apellido2": datos_usuario.Apellido2,
                 "Fecha_Nacimiento": datos_usuario.Fecha_Nacimiento,
+                "Telefono": datos_usuario.Telefono,
                 "Edad": datos_usuario.Edad,
                 "Email": datos_usuario.Email,
                 "User": datos_usuario.Usuario

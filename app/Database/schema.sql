@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.43, for macos15 (arm64)
 --
 -- Host: localhost    Database: paqueteria
 -- ------------------------------------------------------
--- Server version	9.0.1
+-- Server version	9.4.0
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -100,25 +100,8 @@ CREATE TABLE `envio` (
   KEY `id_Destinatario` (`id_Destinatario`),
   CONSTRAINT `envio_ibfk_2` FOREIGN KEY (`id_Remitente`) REFERENCES `usuario` (`id_Usuario`),
   CONSTRAINT `envio_ibfk_3` FOREIGN KEY (`id_Destinatario`) REFERENCES `usuario` (`id_Usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb3 */ ;
-/*!50003 SET character_set_results = utf8mb3 */ ;
-/*!50003 SET collation_connection  = utf8mb3_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `GetFecha_Actual` BEFORE INSERT ON `envio` FOR EACH ROW BEGIN
-    SET NEW.Fecha_Envio = NOW();
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `historial_ubicacion`
@@ -197,7 +180,7 @@ DROP TABLE IF EXISTS `paquete`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `paquete` (
   `id_Paquete` int NOT NULL AUTO_INCREMENT,
-  `Guia` varchar(18) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Guia` varchar(18) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `Peso` decimal(16,2) DEFAULT NULL,
   `Largo` decimal(16,2) DEFAULT NULL,
   `Alto` decimal(16,2) DEFAULT NULL,
@@ -206,7 +189,7 @@ CREATE TABLE `paquete` (
   PRIMARY KEY (`id_Paquete`),
   KEY `fk_paquete_envio_idx` (`id_Envio`),
   CONSTRAINT `fk_paquete_envio` FOREIGN KEY (`id_Envio`) REFERENCES `envio` (`id_Envio`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -255,10 +238,11 @@ CREATE TABLE `usuario` (
   `Fecha_Nacimiento` date DEFAULT NULL,
   `Edad` int DEFAULT NULL,
   `Email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Telefono` varchar(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `Usuario` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `Contrasena` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id_Usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -300,4 +284,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-05-21 22:15:20
+-- Dump completed on 2025-12-14 23:41:18
