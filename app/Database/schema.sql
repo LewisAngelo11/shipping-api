@@ -42,6 +42,25 @@ CREATE TABLE `codigos_postales` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `destinatario`
+--
+
+DROP TABLE IF EXISTS `destinatario`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `destinatario` (
+  `id_Destinatario` int NOT NULL AUTO_INCREMENT,
+  `Nombre` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Apellido1` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Apellido2` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Telefono` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id_Destinatario`),
+  UNIQUE KEY `Email_UNIQUE` (`Email`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `empleado`
 --
 
@@ -91,16 +110,17 @@ CREATE TABLE `envio` (
   `Fecha_Entrega` date DEFAULT NULL,
   `Costo` double DEFAULT NULL,
   `Origen` varchar(70) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Direccion_Origen` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `Destino` varchar(70) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Direccion_Destino` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `id_Remitente` int DEFAULT NULL,
   `id_Destinatario` int DEFAULT NULL,
   `Estatus` enum('EN PROCESO','ENVIADO','EN ENTREGA A DOMICILIO','ENTREGADO') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id_Envio`),
   KEY `id_Remitente` (`id_Remitente`),
   KEY `id_Destinatario` (`id_Destinatario`),
-  CONSTRAINT `envio_ibfk_2` FOREIGN KEY (`id_Remitente`) REFERENCES `usuario` (`id_Usuario`),
-  CONSTRAINT `envio_ibfk_3` FOREIGN KEY (`id_Destinatario`) REFERENCES `usuario` (`id_Usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  CONSTRAINT `envio_ibfk_2` FOREIGN KEY (`id_Remitente`) REFERENCES `usuario` (`id_Usuario`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -189,7 +209,7 @@ CREATE TABLE `paquete` (
   PRIMARY KEY (`id_Paquete`),
   KEY `fk_paquete_envio_idx` (`id_Envio`),
   CONSTRAINT `fk_paquete_envio` FOREIGN KEY (`id_Envio`) REFERENCES `envio` (`id_Envio`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -244,36 +264,6 @@ CREATE TABLE `usuario` (
   PRIMARY KEY (`id_Usuario`)
 ) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `calcular_edad` BEFORE INSERT ON `usuario` FOR EACH ROW BEGIN
-    IF NEW.Fecha_Nacimiento IS NOT NULL THEN
-        SET NEW.Edad = YEAR(CURDATE()) - YEAR(NEW.Fecha_Nacimiento) -
-                       (DATE_FORMAT(CURDATE(), '%m%d') < DATE_FORMAT(NEW.Fecha_Nacimiento, '%m%d'));
-    ELSE
-        SET NEW.Edad = NULL;
-    END IF;
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-
---
--- Dumping events for database 'paqueteria'
---
-
---
--- Dumping routines for database 'paqueteria'
---
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -284,4 +274,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-14 23:41:18
+-- Dump completed on 2025-12-17  0:05:49
