@@ -100,28 +100,6 @@ def actualizar_usuario():
         return jsonify({'mensaje': 'Error interno'}), 500
 
 
-# CORRECIONES: El metodo http de esta función debe ser "DELETE" y no "POST. Ademas, debe tomar como parametro unico como el usuario o id"
-# Función para eliminar un usuario de la BD.
-@user_bp.route('/eliminarUsers', methods=['POST'])
-def eliminar_usuario():
-    conexion = obtener_conexion()
-    datos = request.json  # Obtiene los datos del archivo json de la página web
-    cursor = conexion.cursor()
-
-    try:
-        cursor.execute("DELETE FROM paqueteria.usuario WHERE contrasena = %s;",(datos['contraseña'],))
-
-        conexion.commit()
-        return jsonify(
-            {"status": "success"}), 200
-    except Exception as err:
-        print(err)
-        return jsonify({"status": "error", "mensaje": str(err)}), 400
-    finally:
-        cursor.close()
-        conexion.close()
-
-
 # Función para consultar el historial de envios hechos por el usuario
 @user_bp.route("/usuario/historial", methods=["GET"])
 def consultar_historial_envios():
@@ -141,7 +119,7 @@ def consultar_historial_envios():
 
         stmt = (
             select(
-                Envio.Fecha_Envio,
+                Envio.Fecha_Entrega,
                 Rastreo.Codigo_Rastreo,
                 Envio.Origen,
                 Envio.Destino,
